@@ -44,7 +44,7 @@ export class SocketService {
     let observable = new Observable<any>(observer=>{
       this.socket.on('connexionRep', (data:any)=>{
         //const sockId = this.socket.id;
-        console.log("rep",data);
+        //console.log("rep",data);
         observer.next(data);
       });
       return () => {this.socket.disconnect();}
@@ -61,6 +61,19 @@ export class SocketService {
     this.socket = io(this.url);
     let observable = new Observable<any>(observer=>{
       this.socket.on('new message', (data:any)=>{
+        //const sockId = this.socket.id;
+        observer.next(data);
+      });
+
+      return () => {this.socket.disconnect();}
+    });
+    return observable;
+  }
+
+  allMessageRecieved(){
+    this.socket = io(this.url);
+    let observable = new Observable<any>(observer=>{
+      this.socket.on('display-mesg', (data:any)=>{
         //const sockId = this.socket.id;
         observer.next(data);
       });

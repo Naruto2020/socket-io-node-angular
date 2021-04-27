@@ -1,6 +1,16 @@
 <div class="chat-messages">
-  <div class="chat-messages-show-container">
-    <ul class="chat-messages-show-list">
+  <div #scrollMe style="overflow: scroll; height: xyz;" class="chat-messages-show-container" (scroll)="onScroll()">
+
+    <!--<ul #messages class="all-msgs" *ngFor="let msg of msgList" >
+      <li style="background:white; padding:15px 30px; margin:10px; text-align:right" *ngIf="msg.mess.id === storage"> {{msg.mess.data}} </li>
+      <li style="background:white; padding:15px 30px; margin:10px" *ngIf="msg.mess.id !== storage"> {{msg.mess.data}} </li>
+    </ul>-->
+
+
+    <ul  class="chat-messages-show-list" *ngFor="let msg of msgList" >
+      <li style="background:blue; color: white; width: 20%; padding:15px 30px; margin:10px; margin-left: 69%; text-align:center" *ngIf="msg.mess.id === storage"> {{msg.mess.data}} </li>
+      <li style="background:white; padding:15px 30px; margin:10px; width: 20%; text-align:center" *ngIf="msg.mess.id !== storage"> <span *ngIf="online === true" style="color:#00ff00; font-weight: bold;">  online</span> {{msg.mess.data}}</li>
+
     </ul>
   </div>
   <div class="chat-messages-create-container">

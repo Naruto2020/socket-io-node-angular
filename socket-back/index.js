@@ -25,6 +25,7 @@ const io = new IOServer(server, {
 });
 
 const {User} = require("./models/user");
+const {Msgs} = require("./models/message");
 
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -55,6 +56,9 @@ let allConnexions = [];
 let allUsers = [];
 
 io.on("connect", (socket)=>{
+    Msgs.find().then(res =>{
+        socket.emit("display-mesg", res)
+    });
 
     // on récupère les informations du formulaire en cas de  connexion
     socket.on("connexion", async(data) => {
@@ -67,19 +71,23 @@ io.on("connect", (socket)=>{
             allUsers.push(socket.id);
             console.log(allUsers);
             // on repond au client
-            socket.emit("connexionRep", { success: true });
+            socket.broadcast.emit("connexionRep", { success: true });
         }else{
-            socket.emit("connexionRep", { success: false });
+            socket.broadcast.emit("connexionRep", { success: false });
         }
     });
 
     socket.on('message', (msg)=>{
 
-        console.log('message du client : ' + msg.data);
-        socket.broadcast.emit('new message', msg);
+        const message = new Msgs({mess : msg});
+        message.save().then(()=>{
+            console.log('message du client : ' + msg.data);
+            socket.broadcast.emit('new message', msg);
+
+        });
     });
 
 });
 
-
+// nb to emit message you can use also io.emit instead of socket.broadcast.emit
  
