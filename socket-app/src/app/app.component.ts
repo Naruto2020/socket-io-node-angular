@@ -1,5 +1,8 @@
 import { Component, OnInit} from '@angular/core';
 import {SocketService} from './socket.service';
+import { io } from 'socket.io-client';
+import { FormControl, FormGroupDirective, FormBuilder, FormGroup, NgForm } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -7,13 +10,15 @@ import {SocketService} from './socket.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'socket-app';
 
-  constructor(private sockService : SocketService){}
+
+  constructor(){}
 
   ngOnInit() {
-    this.sockService.socketConnexions(); // (6) call socket function init after importing service modules ...
+
   }
+
+
 }
 
 

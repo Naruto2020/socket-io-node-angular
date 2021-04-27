@@ -1,9 +1,4 @@
-// load up modules and app init 
-const express = require("express");
-const app = express();
-const cors = require("cors");
-const PORT = 5000;
-
+const server = require("./app"); // .server autre cas 
 
 const corsOptions = {
     origins: 'http://localhost:4200',
@@ -13,18 +8,14 @@ const corsOptions = {
     'methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
     'preflightContinue': false
 };
-app.use(cors(corsOptions));
 
-app.get("/", (req, res)=>{
-    return res.send("<h1>Hello socket ?!!!</h1>")
+server.listen(process.env.PORT, ()=>{
+    console.log(`app listening on port : ${process.env.PORT}`);
 });
 
-const server = app.listen(PORT, ()=>{
-    console.log(`app listening on port : ${PORT}`);
-});
 
 /**
- * Partie WebSocket
+ *  WebSocket
  */
 
 // initialize a new instance of socket.io
@@ -33,28 +24,62 @@ const io = new IOServer(server, {
     cors : corsOptions,
 });
 
-//  listen on the connection and disconnection
-io.on("connect", (socket)=>{
-    console.log("le server a accepter la connexion en ws du client... ");
-    socket.on("disconnect", ()=>{
-        console.log("le server est déconnecter ")
-    });
-    //Let’s register an event called my message
-    socket.on('my message', (msg) => {
-        console.log('message du client angular: ' + msg);
-    });
-});
+const {User} = require("./models/user");
 
-//emit a 'my broadcat' event from server 
-io.on("connect", (socket)=>{
-    socket.on('my message', (msg)=>{
-        socket.emit('my broadcast', `server :  ${msg}`);
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+
+// initialisation de la durée du token 
+const maxlife = 3 * 24 * 60 * 60 * 1000; // en milisecondeequivaut à 03 jours 
+const createToken = (id)=>{
+    return jwt.sign({id}, process.env.TOKEN_SECRET, {
+        expiresIn : maxlife,
+
     });
-});
+}
+
 
 //fetch query information on the Backend,
-io.on('connection', (socket) => {
+/*io.on('connect', (socket) => {
     let token = socket.handshake.auth.token;
     console.log("token :",token);
+});*/
+
+// chat 
+
+// creation des variables qui vont stocker toutes les connexions et les joueurs
+let allConnexions = [];
+let allUsers = [];
+
+io.on("connect", (socket)=>{
+
+    // on récupère les informations du formulaire en cas de  connexion
+    socket.on("connexion", async(data) => {
+        
+        const user = await User.login(data.email, data.password);
+        console.log("testt",user)
+
+        if(user){
+            //console.log(data);
+            allUsers.push(socket.id);
+            console.log(allUsers);
+            // on repond au client
+            socket.emit("connexionRep", { success: true });
+        }else{
+            socket.emit("connexionRep", { success: false });
+        }
+    });
+
+    socket.on('message', (msg)=>{
+
+        console.log('message du client : ' + msg.data);
+        socket.broadcast.emit('new message', msg);
+    });
+
 });
+
+
  
